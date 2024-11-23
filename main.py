@@ -16,12 +16,16 @@ def detect_hit(landmarks):
         shoulder_right = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER]
         elbow_left = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW]
         elbow_right = landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW]
+        ear = landmarks[mp_pose.PoseLandmark.LEFT_EAR]
 
-        if wrist_left.y > shoulder_left.y and wrist_right.y > shoulder_right.y:
+        if abs(wrist_left.y - wrist_right.y) < 0.05 and abs(wrist_left.x - wrist_right.x) < 0.1 and abs(elbow_left.y - elbow_right.y) < 0.05 and abs(elbow_left.x - elbow_right.x) < 0.1 and wrist_left.y > shoulder_left.y and wrist_right.y > shoulder_right.y:
             return "Lower hit"
 
-        elif wrist_left.y < shoulder_left.y and wrist_right.y < shoulder_right.y:
+        if wrist_left.y < shoulder_left.y and wrist_right.y < shoulder_right.y:
             return 'Upper hit'
+
+        elif wrist_left.y < ear.y and wrist_right.y > shoulder_right.y:
+            return 'Attack'
 
         return None
 
