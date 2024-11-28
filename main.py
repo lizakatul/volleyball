@@ -21,11 +21,14 @@ def detect_hit(landmarks):
         if abs(wrist_left.y - wrist_right.y) < 0.05 and abs(wrist_left.x - wrist_right.x) < 0.1 and abs(elbow_left.y - elbow_right.y) < 0.05 and abs(elbow_left.x - elbow_right.x) < 0.1 and wrist_left.y > shoulder_left.y and wrist_right.y > shoulder_right.y:
             return "Lower hit"
 
-        if wrist_left.y < shoulder_left.y and wrist_right.y < shoulder_right.y:
-            return 'Upper hit'
-
-        elif wrist_left.y < ear.y and wrist_right.y > shoulder_right.y:
+        if wrist_left.y < ear.y and wrist_right.y > shoulder_right.y:
             return 'Attack'
+
+        if wrist_left.y < ear.y and wrist_right.y < ear.y and abs(wrist_left.y - wrist_right.y) < 0.05 and abs(wrist_left.x - wrist_right.x) < 0.1 and  abs(elbow_left.y - elbow_right.y) < 0.05 and abs(elbow_left.x - elbow_right.x) < 0.1:
+            return 'Block'
+
+        elif wrist_left.y < shoulder_left.y and wrist_right.y < shoulder_right.y:
+            return 'Upper hit'
 
         return None
 
@@ -52,7 +55,7 @@ while True:
 
     structure = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
     combined_mask = cv2.morphologyEx(combined_mask, cv2.MORPH_CLOSE, structure)
-    combined_mask = cv2.morphologyEx(combined_mask, cv2.MORPH_OPEN, structure)§
+    combined_mask = cv2.morphologyEx(combined_mask, cv2.MORPH_OPEN, structure)
 
     contours, _ = cv2.findContours(combined_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
