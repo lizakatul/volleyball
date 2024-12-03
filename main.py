@@ -13,7 +13,7 @@ attack_sound = pygame.mixer.Sound('sounds/Attack.mp3')
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
 
-cap = cv2.VideoCapture('test/upper_and_lower_test2.mov')
+cap = cv2.VideoCapture('test/attack_test4.mov')  #заменить на нужный файл
 
 pose = mp_pose.Pose()
 hit_display_time = 2
