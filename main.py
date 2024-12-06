@@ -14,12 +14,15 @@ mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
 pose = mp_pose.Pose()
 
-cap = cv2.VideoCapture('test/attack_test6.mov')  # замените на нужный файл
+cap = cv2.VideoCapture('test/attack_test1.mov')
 
-hit_display_time = 5
-last_hit_time = 0
-last_hit_type = None
 hit_distance_threshold = 100
+serve_detected = False
+text_duration = 1
+text_start_time = None
+current_text = None
+last_hit_time = 0
+hit_cooldown = 1
 
 def detect_hit(landmarks):
     if landmarks:
@@ -45,7 +48,7 @@ def detect_hit(landmarks):
     return None
 
 def distance(point1, point2):
-    return np.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
+    return np.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
 
 while True:
     ret, frame = cap.read()
@@ -79,6 +82,12 @@ while True:
     image_2_rgb = cv2.cvtColor(person_2, cv2.COLOR_BGR2RGB)
     results_2 = pose.process(image_2_rgb)
     landmarks_2 = results_2.pose_landmarks.landmark if results_2.pose_landmarks else None
+
+    num_people_in_frame = 0
+    if landmarks_1:
+        num_people_in_frame += 1
+    if landmarks_2:
+        num_people_in_frame += 1
 
     closest_player = None
     closest_distance = float('inf')
@@ -122,20 +131,32 @@ while True:
         elif closest_player == 2 and landmarks_2:
             hit_result = detect_hit(landmarks_2)
 
-    if hit_result:
-        last_hit_time = time.time()
-        last_hit_type = hit_result
-        if last_hit_type == 'Upper hit':
-            upper_sound.play()
-        elif last_hit_type == 'Lower hit':
-            lower_sound.play()
-        elif last_hit_type == 'Attack':
-            attack_sound.play()
-        elif last_hit_type == 'Serve':
+    current_time = time.time()
+    if current_time - last_hit_time >= hit_cooldown and hit_result:
+        if hit_result == 'Serve' and num_people_in_frame == 1:
             serve_sound.play()
+            current_text = "Serve"
+            text_start_time = current_time
+            last_hit_time = current_time
 
-    if last_hit_type and (time.time() - last_hit_time < hit_display_time):
-        cv2.putText(frame, last_hit_type, (20, 50), cv2.FONT_ITALIC, 1, (0, 255, 0), 2)
+        elif hit_result == 'Upper hit':
+            upper_sound.play()
+            current_text = "Upper hit"
+            text_start_time = current_time
+            last_hit_time = current_time
+        elif hit_result == 'Lower hit':
+            lower_sound.play()
+            current_text = "Lower hit"
+            text_start_time = current_time
+            last_hit_time = current_time
+        elif hit_result == 'Attack':
+            attack_sound.play()
+            current_text = "Attack"
+            text_start_time = current_time
+            last_hit_time = current_time
+
+    if current_text and (time.time() - text_start_time < text_duration):
+        cv2.putText(frame, current_text, (20, 50), cv2.FONT_ITALIC, 1, (0, 255, 0), 2)
 
     cv2.imshow('Hit Detection', frame)
 
@@ -144,6 +165,3 @@ while True:
 
 cap.release()
 cv2.destroyAllWindows()
-
-
-
