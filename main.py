@@ -16,7 +16,7 @@ mp_drawing = mp.solutions.drawing_utils
 pose = mp_pose.Pose()
 
 
-cap = cv2.VideoCapture('test/attack_test5.mov') #вставить нужный файл
+cap = cv2.VideoCapture('test/upper_and_lower_test1.mov') #вставить нужный файл
 
 
 hit_distance_threshold = 100
